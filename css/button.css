@@ -1,0 +1,18 @@
+/*
+    Note: > selects immediate children - meaning not all descendants, just the
+    first level children.  Pulled this in, but not everything is yet installed to
+    allow for 'import'.
+*/
+.buttonClass > button {
+    outline: 0;
+    background: #fff;
+    color: #fe718f;
+    font-size: 1rem;
+    padding: 1rem;
+    margin: 1rem;
+    border: 0;
+    box-shadow: none;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 5px;
+}

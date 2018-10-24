@@ -1,0 +1,22 @@
+/* See the readme about using this font-size percentage -
+   it helps to convert rem's to base 10.
+*/
+html {
+    font-size: 62.5%;
+}
+
+body {
+    background-color: white;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: $m-size;
+}
+
+/* Generic button styling.
+*/
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: default;
+}

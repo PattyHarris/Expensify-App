@@ -97,3 +97,87 @@ historyApiFallback tells the devServer that we are handling all routing in the c
 As it stands now, this will return both "/" and "/create" when you use localhost:8080/create since it matches both URLs.  To fix this problem, add the "exact={true}" attribute to the root route.
 
 8. Challenge is to add a "/edit"  and "/help" route using the same mechanisms as above....
+
+## Setting up a 404
+
+1. First add a simple NotFoundPage stateless functional component (as with the others so far) and add this to the list of routes with no path property.  The react-router will treat this as a match for all paths as well as paths we don't match, which is NOT what we want.  To fix this issue, we're going to use the react-router "Switch" component, replacing the current "div" tag with "Switch":
+```
+const NotFoundPage = () => (
+    <div>
+        404!
+    </div>
+);
+
+const routes = (
+    <BrowserRouter>
+        <Switch>
+            <Route path="/" component={ExpenseDashboardPage} exact={true} />
+            <Route path="/create" component={AddExpensePage} />
+            <Route path="/edit" component={EditExpensePage} />
+            <Route path="/help" component={HelpPage} />
+            <Route  component={NotFoundPage} />
+        </Switch>
+    </BrowserRouter>
+);
+```
+
+2. With Switch, react-route moves the list of routes in order and stops when it finds a match.
+
+## Linking between Routes
+
+1. The goal here is to switch pages without going through the full page refresh (that is, server side routing).  Even if you use an href tag, you will still be using the server to change pages.
+
+3. React-router provides Link and NavLink for client side routing.  To use Link, instead of the href below, use Link:
+```
+const NotFoundPage = () => (
+    <div>
+        404 - <a href="/">Go Home</a>
+    </div>
+);
+```
+Using Link:
+
+```
+const NotFoundPage = () => (
+    <div>
+        404 - <Link to="/">Go Home</Link>
+    </div>
+);
+```
+If you are linking outside the app, use href (e.g. not within your own app).
+
+4. To render a header on every page, first create a stateless functional component Header that uses the HTML header tag:
+```
+const Header  () => {
+    <header>
+        <h1>Expersify</h1>
+    </header>
+}
+```
+
+Then, re-work the current routes code to put everything except the BrowserRouter in a "div" tag.  Here, add the Header component - now the header will appear on every page.
+
+```
+const routes = (
+    <BrowserRouter>
+        <div>
+            <Header/>
+            <Switch>
+                <Route path="/" component={ExpenseDashboardPage} exact={true} />
+                <Route path="/create" component={AddExpensePage} />
+                <Route path="/edit" component={EditExpensePage} />
+                <Route path="/help" component={HelpPage} />
+                <Route  component={NotFoundPage} />
+            </Switch>
+        </div>
+    </BrowserRouter>
+);
+```
+
+5. The challenge is to add links in the Header component for home, create, edit, and help.
+
+6.  Using just Link, all the Header links are shown bumped into each other.  To fix that, use NavLink which is suited for cases where you have a number of links as we do with the Header.  NavLink also allows for customization (such as changing the link when you're on that link's page or changing it's color, etc).  
+
+7. The property activeClassName allows you to specify a style for the active page.  Add "is-active" style that is defined in the "base" partial.
+
+8. Like the Route definitions, we need to use exact=true for the NavLink as well - otherwise, the style is applied to the Dashboard link along with any of the other links.

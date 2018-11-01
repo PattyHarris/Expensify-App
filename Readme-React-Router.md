@@ -181,3 +181,11 @@ const routes = (
 7. The property activeClassName allows you to specify a style for the active page.  Add "is-active" style that is defined in the "base" partial.
 
 8. Like the Route definitions, we need to use exact=true for the NavLink as well - otherwise, the style is applied to the Dashboard link along with any of the other links.
+
+## Organizing Routes
+
+1. Here we'll be breaking up the app.js file into components and routers.  To start, create a new folder "routers" to hold the AppRouter.js - this is not in the components folder since it's a special type of component that isn't re-usable.
+
+2. To start breaking things up, move all the functional components and the routes into the new file AppRouter.js (so that everything works initially).  Add the imports for react and the react-router.
+
+3. In AppRouter.js, make the "const routes" into a stateless functional component, AppRouter, and export AppRouter as the default export.   Then, import the component inside app.js and make an instance of it such that we have what we had before.

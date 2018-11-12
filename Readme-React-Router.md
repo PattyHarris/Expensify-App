@@ -189,3 +189,56 @@ const routes = (
 2. To start breaking things up, move all the functional components and the routes into the new file AppRouter.js (so that everything works initially).  Add the imports for react and the react-router.
 
 3. In AppRouter.js, make the "const routes" into a stateless functional component, AppRouter, and export AppRouter as the default export.   Then, import the component inside app.js and make an instance of it such that we have what we had before.
+
+4. The challenge is to push all the stateless functional components into their own files, setting the imports in AppRouter.js as needed.
+
+## Query Strings and URL Parameters
+
+1. To see what props we're getting passed, switch out EditExpensePage such that it has an explicit return instead of an implicit return - allows us to add a console.log...
+```
+const EditExpensePage = (props) => {
+    console.log(props);
+    return (
+        <div>
+            This is from my edit expense component.
+        </div>
+    );
+}
+
+```
+
+2. Inside the props, the "history" object allows you to manipulate where the user is or is redirected.  The "match" object contains a "params" object that is used for dynamic URLs.  The "location" object contains the "query" string passed into the URL (for example, if search criteria were passed in as query parameters).
+
+3. Inside the "location" object is a "hash" value, e.g. /edit#contact-us which could be used to scroll down to the portion of the page with the "contact us" information.
+
+4. To make the "edit" url dynamic, such that you could pass in the database ID of the item that is being edited - see the change to the route where after the "/" a ":id" is added - that means the react-router will match anything after the "/":
+```
+<Route path="/edit/:id" component={EditExpensePage} />
+```
+If use the url, edit/99, the "props" object in the console will include a "match" object that contains:
+params, id=99 (as key//value)
+path = edit/:id
+url = edit/99
+
+With this change, now if you just use /edit, you will get a 404 (which makes sense) = we'll never go into the edit page without specifying which expense we're going to edit.  So, we'll also remove the NavLink from the Header component since we'll never use the edit page that way.
+
+## Build it: Router for Portfolio Site
+
+1. Contains 3 pages, Home, Portfolio, and Contact
+URLs:
+/                            -> Home page
+/portfolio              -> Portfolio home page with links to items
+/portfolio/123       -> Individual portfolio item page that shows the ID.
+/contact                -> Contact page
+
+2. The Home page has a title of Porfolio, the navigation links, a Welcome header (h1), and "This is my site.  Take a look around!" (p tag).
+
+2.  The Portfolio page contains the navigation links, Contact Me (h1) and "You can reach me at test@gmail.com" (p tag).  The URL here is /contact
+
+3. On the Porfolio page itself, again the same header.  It as an h1 tag with "My Work"  followed by "Checkout the following things I've done:" (p tag).  It also contains a list of links (e.g. Item One, Item Two).  When you click on the first one (for example), it will take you to /portfolio/1 - here, it has "A Thing I've Done" (h1) followed by "This page is for the item with an id of 1".
+
+4. The project is started by copying the expensify-app and renaming it to portfolio-site.
+
+5. Keep the Header and NotFoundPage.  In the Header component, remove all the links and replace them with the links for this site.  In AppRouter.js, again keeping the Header and NotFoundPage, remove all the other expensify-app components.  These will be replace with the components for this project.
+
+6. I should have used "Link" instead of "NavLink" in PortfolioPage since we don't stay on that page...

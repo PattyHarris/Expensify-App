@@ -1,5 +1,24 @@
 import {createStore} from 'redux';
 
+// Action generators - functions that return action objects.
+
+// NOTE: the naming convention is to use all
+// uppercase (with underscores between words).
+
+// This is the same as below, which I always forget...
+// const incrementCount = () => {
+//     return {
+//         type: 'INCREMENT'
+//     };
+// };
+
+// Payload defaults to an empty object.  We check that when setting up
+// incrementBy....
+const incrementCount = (payload = {} ) => ({
+    type: 'INCREMENT',
+    incrementBy: typeof payload.incrementBy === 'number' ? payload.incrementBy : 1
+});
+
 // The first argument to createStore is a function.  The first argument to that
 // function is the current state.  Since we don't have a constructor, we set the default
 // value to a default state object, in this case an object that has a "count".
@@ -9,12 +28,8 @@ const store = createStore( (state = { count: 0 }, action) => {
 
     switch (action.type) {
         case 'INCREMENT':
-
-            // Since we don't always get the incrementBy value, we need to check it's validity.
-            const incrementBy = typeof action.incrementBy === 'number' ? action.incrementBy : 1;
-
             return {
-                count: state.count + incrementBy
+                count: state.count + action.incrementBy
             };
         case 'DECREMENT':
 
@@ -49,16 +64,13 @@ const unsubscribe = store.subscribe( () => {
     console.log(store.getState());
 });
 
-// To send an action object to the store:  NOTE: the naming convention is to use all
-// uppercase (with underscores between words).
+// To send an action object to the store:
 store.dispatch( {
     type: 'INCREMENT',
     incrementBy: 5
 });
 
-store.dispatch( {
-    type: 'INCREMENT'
-});
+store.dispatch( incrementCount() );
 
 // If we unsubscribe, the remaining dispatches won't cause the store
 // to call the subscribe method.

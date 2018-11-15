@@ -206,3 +206,64 @@ console.log(`A medium ${coffeeType} costs ${mediumPrice}.`);
 ```
 
 ## Refactoring and Reorganizing
+
+1. Here we're going to be using destructuring to refactor our redux code.  Switch the webpack.config.js back to using redux-101.js.
+
+2. Start by creating action generators - these are functions that return action objects.  The first action generator will take care of all the 'INCREMENT' objects, e.g.
+```
+store.dispatch( {
+    type: 'INCREMENT'
+});
+
+```
+
+An action generator for the above:
+```
+const incrementCount = () => {
+    return {
+        type: 'INCREMENT'
+    };
+};
+store.dispatch( incrementCount() );
+```
+
+Using these simple functions prevents errors from mistyping and enables auto-completion to work for you as well...
+
+3. To handle special input to an action generator, we add an input parameter that is an object that defaults to an empty object.  The action generator is called by passing in an object - with this, we can call incrementCount with or with out the payload object value:
+```
+const incrementCount = ( payload = {} ) => ({
+    type: 'INCREMENT',
+    incrementBy:  typeof payload.incrementBy === 'number' ? payload.incrementBy : 1
+});
+
+store.dispatch( incrementCount( {incrementBy : 5}));
+```
+
+Note that you need to have payload set to a default value (e.g. {}) otherwise, if we call the action generator without a payload, payload will be undefined and therefore incrementBy will be undefined.  Think of payload as an action object.
+
+
+4. You can also destructure arguments that get passed into functions - for example, the following are equivalent:
+```
+const add = (data) => {
+    return data.a + data.b;
+};
+console.log( add ( {a: 1, b: 12}));
+```
+
+We can remove the data object and add {} to replace the first argument into the add function:
+```
+const add = ({a, b}) => {
+    return a + b;
+};
+console.log( add ( {a: 1, b: 12}));
+```
+
+To pass in a 3rd argument:
+```
+const add = ({a, b}, c) => {
+    return a + b + c;
+};
+console.log( add ( {a: 1, b: 12}, 100));
+```
+
+5. We can also add defaults to destructured function arguments:

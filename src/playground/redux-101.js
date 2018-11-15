@@ -13,11 +13,27 @@ import {createStore} from 'redux';
 // };
 
 // Payload defaults to an empty object.  We check that when setting up
-// incrementBy....
-const incrementCount = (payload = {} ) => ({
+// incrementBy....refactoring, the following is the same as below where
+// we used destructuring to refactor the payload object and initialized the
+// destructured argument as well.
+
+// const incrementCount = (payload = {} ) => ({
+//     type: 'INCREMENT',
+//     incrementBy: typeof payload.incrementBy === 'number' ? payload.incrementBy : 1
+// });
+
+const incrementCount = ( { incrementBy = 1 } = {} ) => ({
     type: 'INCREMENT',
-    incrementBy: typeof payload.incrementBy === 'number' ? payload.incrementBy : 1
+    // Recall the the following is the same as
+    // incrementBy: incrementBy
+    incrementBy
 });
+
+const decrementCount = ( { decrementBy = 1 } = {} ) => ({
+    type: 'DECREMENT',
+    decrementBy
+});
+
 
 // The first argument to createStore is a function.  The first argument to that
 // function is the current state.  Since we don't have a constructor, we set the default
@@ -64,12 +80,14 @@ const unsubscribe = store.subscribe( () => {
     console.log(store.getState());
 });
 
-// To send an action object to the store:
-store.dispatch( {
-    type: 'INCREMENT',
-    incrementBy: 5
-});
+// To send an action object to the store - the following with custom
+// data is the same - using destructured arguments...
+// store.dispatch( {
+//     type: 'INCREMENT',
+//     incrementBy: 5
+// });
 
+store.dispatch( incrementCount( { incrementBy: 5} ));
 store.dispatch( incrementCount() );
 
 // If we unsubscribe, the remaining dispatches won't cause the store
@@ -86,14 +104,9 @@ store.dispatch( {
 // Not needed with the subscribe call.
 // console.log(store.getState());
 
-store.dispatch( {
-    type: 'DECREMENT',
-    decrementBy: 10
-});
+store.dispatch( decrementCount( {decrementBy: 10} ));
 
-store.dispatch( {
-    type: 'DECREMENT'
-});
+store.dispatch( decrementCount() );
 
 // Used as an example for required data - basically there's no checking whether the
 // data exists or not...

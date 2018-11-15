@@ -266,4 +266,14 @@ const add = ({a, b}, c) => {
 console.log( add ( {a: 1, b: 12}, 100));
 ```
 
-5. We can also add defaults to destructured function arguments:
+5. We can also add defaults to destructured function arguments - using incrementCount - recall when the argument property has the same name as the local variable, we don't need to use incrementBy: incrementBy.
+```
+const incrementCount = ( { incrementBy = 1 } = {} ) => ({
+    type: 'INCREMENT',
+    // Recall the the following is the same as
+    // incrementBy: incrementBy
+    incrementBy
+});
+```
+
+6. We repeat the steps above for decrementCount.

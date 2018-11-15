@@ -34,6 +34,16 @@ const decrementCount = ( { decrementBy = 1 } = {} ) => ({
     decrementBy
 });
 
+// This didn't need a default object since the count is required...
+// also no default value was needed...
+const setCount = ( {count } ) => ({
+    type: 'SET',
+    count
+});
+
+const resetCount = () => ({
+    type: 'RESET'
+});
 
 // The first argument to createStore is a function.  The first argument to that
 // function is the current state.  Since we don't have a constructor, we set the default
@@ -48,12 +58,8 @@ const store = createStore( (state = { count: 0 }, action) => {
                 count: state.count + action.incrementBy
             };
         case 'DECREMENT':
-
-            // Since we don't always get the decrementBy value, we need to check it's validity.
-            const decrementBy = typeof action.decrementBy === 'number' ? action.decrementBy : 1;
-
             return {
-                count: state.count - decrementBy
+                count: state.count - action.decrementBy
             };
         case 'RESET':
             return {
@@ -97,9 +103,7 @@ store.dispatch( incrementCount() );
 // Not needed with the subscribe call.
 // console.log(store.getState());
 
-store.dispatch( {
-    type: 'RESET'
-});
+store.dispatch( resetCount() );
 
 // Not needed with the subscribe call.
 // console.log(store.getState());
@@ -110,10 +114,7 @@ store.dispatch( decrementCount() );
 
 // Used as an example for required data - basically there's no checking whether the
 // data exists or not...
-store.dispatch( {
-    type: 'SET',
-    count: 101
-});
+store.dispatch( setCount( { count: 101 } ));
 
 // Not needed with the subscribe call.
 // console.log(store.getState());

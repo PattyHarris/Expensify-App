@@ -276,4 +276,6 @@ const incrementCount = ( { incrementBy = 1 } = {} ) => ({
 });
 ```
 
-6. We repeat the steps above for decrementCount.
+6. We repeat the steps above for decrementCount.  The challenge is to add the setCount and resetCount functions.
+
+7. This portion of the tutorial includes all of the redux functions in a single file - later we'll break them out into individual files.

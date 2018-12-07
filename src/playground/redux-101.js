@@ -45,13 +45,13 @@ const resetCount = () => ({
     type: 'RESET'
 });
 
-// The first argument to createStore is a function.  The first argument to that
+// The first argument to createStore is a function - a reducer.  The first argument to that
 // function is the current state.  Since we don't have a constructor, we set the default
 // value to a default state object, in this case an object that has a "count".
-const store = createStore( (state = { count: 0 }, action) => {
+
+// Reducers
+const countReducer = (state = { count: 0 }, action) => {
     console.log(action);
-
-
     switch (action.type) {
         case 'INCREMENT':
             return {
@@ -71,10 +71,11 @@ const store = createStore( (state = { count: 0 }, action) => {
             };
         default:
             return state;
-    };
+    }
+};
 
-});
-
+// Note that the this is a reference to the countReducer function, not a call....
+const store = createStore( countReducer );
 
 // Not needed with the subscribe call.
 // console.log(store.getState());

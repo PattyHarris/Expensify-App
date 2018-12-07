@@ -279,3 +279,299 @@ const incrementCount = ( { incrementBy = 1 } = {} ) => ({
 6. We repeat the steps above for decrementCount.  The challenge is to add the setCount and resetCount functions.
 
 7. This portion of the tutorial includes all of the redux functions in a single file - later we'll break them out into individual files.
+
+## Reducers
+
+1. The job of the reducer is to change the application state in response to an action.  In redux-101 we actually created a reducer indirectly - it's the anonymous function passed into the createStore function - e.g.  (state = { count: 0 }, action) => {....}  So, the current call to createStore becomes:
+```
+const countReducer =  (state = { count: 0 }, action) => {}
+
+const store = createStore(countReducer());
+
+```
+
+2. Reducers have the following properties:
+a. They are pure functions, meaning their return is dependent upon data input to them or the data they currently have.  Their output depends only on their input.  They also don't change anything outside their function:
+```
+let result;
+const add = (a, b) => {
+    result = a + b;
+}
+```
+b. Never directly change state or action.
+
+3. For the next part of this tutorial, create a new file in the playground, redux-expensify.js (change webpack.config.js accordingly).
+
+4. Import both createStore and combineReducers (which allows us to combine multiple reducers).
+
+5. For this example, we create a demoState object that contains an array of expense objects - amount is in cents, createAt is a timestamp value.  Andrew uses cents to get around decimals.  We're also allowing for filters which allow filtering the data.  The filter object below has initial values that allow for filtering the text and sorting (either by amount or by date).
+```
+const demoState = {
+    expenses: [{
+        id: 'abcdefg',
+        description: 'January Rent',
+        note: 'This is the last payment for this apartment',
+        amount: 54500,
+        createdAt: 0
+    }],
+    filter: {
+        text: 'rent',
+        sortBy: 'amount', // Sort by amount or data
+        startDate: undefined,
+        endDate: undefined
+    }
+}
+```
+
+## Working with Multiple Reducers
+
+1. The actions for this data is more complex, and thus need for multiple reducers.   There will be a single reducer for each root property, e.g. expenses and filter.
+
+2. Start with the expensesReducer.  When setting up the reducers, use a variable to define the default values instead of doing that inline, e.g.
+```
+const expensesReducerDefaultState = [];
+const expensesReducer =  (state = expensesReducerDefaultState, action) => {
+
+}
+```
+This will be more apparent when setting defaults for something like the filterReducer.
+
+3. combineReducers takes an object as it's first parameter and in that object, the key is the root state name and the value is the reducer that's supposed to manage it.
+So for example, instead of calling createStore like this:
+
+```
+const expensesReducerDefaultState = [];
+const expensesReducer = (state = expensesReducerDefaultState, action) => {
+};
+
+// Store
+const store = createStore(expensesReducer);
+
+```
+
+We call createStore like this (where expenses is an array in the demoState object above):
+```
+const expensesReducerDefaultState = [];
+const expensesReducer = (state = expensesReducerDefaultState, action) => {
+};
+
+// Store
+const store = createStore(
+    combineReducers( {
+        expenses: expensesReducer
+    })
+);
+
+```
+This allows for more complex stores - the redux store is now an object and the expenses array is a property of that object.
+
+4. The challenge is to add the filterReducer as we did above, with specified defaults (e.g. text='', sortBy='date', startDate and endDate = undefined).
+
+## ES6 Spread Operator in reducers
+
+1. First, create an action generator for the ADD_EXPENSE action.  This takes a 'type' and expense object in which the ID is generated.  We'll be using the NPM library, UUID: https://www.npmjs.com/package/uuid  Eventually, we'll let the database generate the IDs...install the package as before...
+```
+> yarn add uuid@3.1.0
+```
+
+2. The UUID package has default export which is used as the import:
+```
+import uuid from 'uuid';
+```
+
+3. To add data to an array without changing the array itself, you can use 'concat' which will return a new array or the ES6 spread operator.  This comes to play when adding an item to the expenses array - when the reducer receives the ADD_EXPENSE action, we need to add an item to the state, which is actually an array:
+```
+const expensesReducerDefaultState = [];
+const expensesReducer = (state = expensesReducerDefaultState, action) => {
+    switch (action.type) {
+        case 'ADD_EXPENSE':
+            return state.concat(action.expense);
+        default:
+            return state;
+    }
+};
+
+```
+
+The spread operator can be used instead - when you see "...state" where  "state" is an array, read this as "spreading out all the elements of state".  Here, we're adding the expense object onto the state array.
+```
+case 'ADD_EXPENSE':
+    return [
+        ...state,
+        action.expense
+    ]
+
+```
+
+4. The challenge is to remove an expense.  Note that the call to "dispatch" returns the action object, which includes the action ID.  We'll need this to remove the action.  We're also need to use the "filter" method for removing the item from the array - we used "filter" in the last project - see the IndecisionApp project.  This was a bit confusing since I chose to pass in an expense object - filter takes a callback function that returns true or false.  If it returns true, the item is kept in the new array, otherwise, the item is eliminated from the new array.  My original implementation of the function generator with an object:
+```
+const removeExpense = ( { id = ""} = {}) => ({
+    type: 'REMOVE_EXPENSE',
+    expense: {
+        id: id
+    }
+})
+
+```
+What we really just needed:
+```
+const removeExpense = ( { id = ""} = {}) => ({
+    type: 'REMOVE_EXPENSE',
+    id
+})
+
+```
+
+## Spreading Objects
+
+1. The spread operator on objects works like that for arrays, but because it's a bit new, we need a plug for babel.  If you do something like the following, you'll get an error with the existing babel:
+```
+const user = {
+    name: 'Jen',
+    age: 24
+}
+
+console.log({
+    ...user
+});
+```
+
+To fix this, we need a special plug - Google, "babel object spread" - use the link for the Babel object rest spread: https://babeljs.io/docs/en/babel-plugin-proposal-object-rest-spread:
+```
+> yarn add babel-plugin-transform-object-rest-spread@6.23.0
+```
+Add the plugin to .babelrc - recall that we don't need to add the "plugin" prefix to the name:
+```
+{
+    "presets": ["env",  "react"],
+    "plugins": [
+        "transform-class-properties",
+        "transform-object-rest-spread"
+    ]
+}
+```
+With there changes, the console.log above compiles correctly.
+
+2. With the object spread operator, you can add new properties to the new object as well as override existing properties:
+```
+const user = {
+    name: 'Jen',
+    age: 24
+};
+
+console.log({
+    ...user,
+    location: 'California',
+    age: 30
+});
+
+```
+
+3. We'll be using the object spread operator to allow the user to edit their expenses.  We use the "map" operator to iterate over all the expenses.  If we find the matching ID, we spread all the properties of the expense object (meaning we want them all) and override any matching properties from the "update" object that is passed in.
+
+The dispatch call uses the expenseTwo object (since in the current logic, we had removed expenseOne) and update the amount:
+```
+store.dispatch(editExpense(expenseTwo.expense.id, { amount: 500}));
+```
+
+The editExpense function - recall that this returns an object...
+```
+const editExpense = (id, updates) => ({
+    type: EDIT_EXPENSE,
+    id,
+    updates
+});
+```
+
+And then the handler for the EDIT_EXPENSE action:
+```
+    case EDIT_EXPENSE:
+        return state.map( (expense) => {
+            if (expense.id === action.id) {
+                return {
+                    ...expense,
+                    ...action.updates
+                };
+            }
+            else {
+                return expense;
+            }
+        });
+```
+
+4. The challenge is to add an action generator for the filter reducer to set the text of the filter.  The code should use the object spread method as above.  The action generator has the following format - the first call sets the text, whereas the second call should clear the text.
+```
+store.dispatch( setTexFilter("rent"));
+store.dispatch( setTexFilter());
+```
+
+Note that the text is NOT passed in as an object, as with the expense objects.
+
+## Wrapping up our Reducers
+
+1. We start this section with a challenge to complete the filter sort action generators for sorting by date and sorting by amount.  This doesn't entail sorting the actual expenses....just setting the filter..
+
+2. The next step is also a challenge and is to complete the start and end date action generators.  Assume that the date values are number values (e.g. timestamps) and should handle the following calls:
+```
+// The second call resets the start date to undefined.
+store.dispatch(setStartDate(125))
+store.dispatch(setStartDate());
+store.dispatch(setEndDate(1250));
+```
+
+## Filtering Redux Data
+
+1. This section will filter and sort the expenses data - it doesn't sound like we'll be storing the data filtered, just outputting it....
+
+2. Add a function getVisibleExpenses(expenses, filters) and call it in the subscribe method call:
+```
+const getVisisibleExpenses = (expenses, filters) => {
+    // For now, just return expenses
+    return expenses;
+}
+
+store.subscribe( () => {
+    const state = store.getState();
+    const visibleExpenses = getVisibleExpenses(state.expenses, state.filters);
+    console.log(visibleExpenses);
+})
+```
+
+3. Destructure the filter input property in the getVisibleExpenses call:
+```
+const getVisibleExpenses = ( expenses, {text, sortBy, startDate, endDate} ) +> {
+    ....
+}
+```
+
+4. First we'll filter the data - later we'll handle the sortBy....using the filter method that takes a function - the filter callback function returns true or false, where a true match means the item is left in the expenses array, which means it's NOT filtered out.  
+```
+const getVisibleExpenses = (expenses, {text, sortBy, startDate, endDate}) => {
+    return expenses.filter( (expense) => {
+
+    })
+}
+```
+
+Initially, set the text filter to true since that will be a followup challenge.  Added a createdAt timestamp of 1000 and -1000 to the expenses we added.   Everything should be commented out except for the addExpense and setStartDate call (125) for this test.
+
+
+5. The challenge is to complete the code for the text filter.  This will use the "includes" method.  The comparison is case insensitive, so convert the text used for the the filter and expense description to lower case.
+
+## Sorting Redux Data
+
+1. Using the sort method - for simple arrays, to compare function is needed.  When comparing objects, we'll need to add the compare function.
+
+2. Andrew attached the sort method to the return statement at the end of the getVisibleExpenses method - the filtered data is then sorted:
+```
+const getVisibleExpenses = (expenses, { text, sortBy, startDate, endDate }) => {
+    return expenses.filter( (expense) => {
+        ....
+        return startDateMatch && endDateMatch && textMatch;
+    }).sort( (a, b) => {
+
+    })
+}
+```
+
+3. Challenge is to complete the code for the sort by amount.  Uncomment out the sortByAmount console.log call....
